@@ -1,0 +1,24 @@
+﻿{
+  "name": "itinerary-llm",
+  "version": "1.0.0",
+  "description": "LLM-based itinerary generator with StateJS",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node examples/usage.js",
+    "test:corporate": "node examples/usage.js corporate",
+    "test:travel": "node examples/usage.js travel",
+    "test:refinement": "node examples/usage.js refinement"
+  },
+  "dependencies": {
+    "xstate": "^5.18.1",
+    "groq-sdk": "^0.7.0",
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5"
+  },
+  "keywords": ["llm", "itinerary", "travel", "corporate", "statejs"],
+  "author": "Your Name",
+  "license": "MIT"
+}
