@@ -13,6 +13,7 @@ export class EnhancedScraperAgent {
     
     // Get top URLs from search results with better filtering
     const topUrls = this.selectHighQualityUrls(searchResults, context);
+    console.log('High-quality URLs selected:', topUrls.map(u => u.url));
     
     if (topUrls.length === 0) {
       console.warn('No high-quality URLs available for extraction');
@@ -44,6 +45,8 @@ export class EnhancedScraperAgent {
 
     // Filter and enhance extracted content
     const filteredContent = this.filterRelevantContent(extractedContent, context);
+    console.log('Content remaining after filtering:', filteredContent.length, 'items');
+    console.log('First filtered item:', filteredContent[0]);
     
     // Extract structured information using LLM
     const structuredContent = await this.extractStructuredInformation(filteredContent, context);
@@ -160,6 +163,7 @@ export class EnhancedScraperAgent {
       console.log(`Extracting batch: ${urlList.length} URLs`);
       
       const extractedData = await tavilyClient.extract(urlList);
+      console.log('Raw data from Tavily API:', extractedData);
       
       // Merge with metadata and filter content
       return extractedData.map(extracted => {
@@ -337,8 +341,23 @@ ${contentText}
 Extract specific venues, activities, and practical information relevant to the context.`;
 
     try {
-      const result = await groqClient.parseStructuredResponse(prompt, systemPrompt, schema);
+      const completion = await groqClient.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'llama3-70b-8192',
+        response_format: { type: "json_object" }, // Crucial for reliable JSON output
+        temperature: 0.1,
+        max_tokens: 4000
+      });
+
+      const response = completion.choices[0]?.message?.content || '{}';
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
       
+      if (!jsonMatch) {
+        throw new Error('No valid JSON found in LLM response.');
+      }
+      
+      const result = JSON.parse(jsonMatch[0]);
+
       // Add metadata to extracted items
       result.venues = result.venues?.map(venue => ({
         ...venue,
@@ -355,6 +374,7 @@ Extract specific venues, activities, and practical information relevant to the c
       return [result];
     } catch (error) {
       console.error('Structured extraction failed:', error.message);
+      // Fallback in case of failure
       return [];
     }
   }

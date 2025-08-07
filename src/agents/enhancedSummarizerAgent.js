@@ -170,7 +170,21 @@ Available Data:
 Create detailed summaries that will help generate specific, actionable itinerary recommendations.`;
 
     try {
-      return await groqClient.parseStructuredResponse(prompt, systemPrompt, schema);
+      const completion = await groqClient.chat.completions.create({
+        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }],
+        model: 'llama3-70b-8192',
+        temperature: 0.1,
+        response_format: { type: "json_object" },
+        max_tokens: 4000
+      });
+
+      const response = completion.choices[0]?.message?.content || '{}';
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      throw new Error('No valid JSON in response');
     } catch (error) {
       console.error('Category summarization failed:', error.message);
       return this.createFallbackSummaries(consolidatedContent, context);
@@ -222,7 +236,21 @@ Top Activities: ${JSON.stringify(consolidatedContent.activities.slice(0, 5), nul
 Provide specific, implementable recommendations that can guide detailed itinerary creation.`;
 
     try {
-      return await groqClient.parseStructuredResponse(prompt, systemPrompt, schema);
+      const completion = await groqClient.chat.completions.create({
+        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }],
+        model: 'llama3-70b-8192',
+        temperature: 0.1,
+        response_format: { type: "json_object" },
+        max_tokens: 4000
+      });
+
+      const response = completion.choices[0]?.message?.content || '{}';
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      throw new Error('No valid JSON in response');
     } catch (error) {
       console.error('Recommendations generation failed:', error.message);
       return this.createFallbackRecommendations(consolidatedContent, context);
@@ -247,7 +275,7 @@ Provide realistic cost estimates and budget allocation recommendations.`;
           options: "array of cost options"
         },
         activities: {
-          estimatedCost: "number", 
+          estimatedCost: "number",
           percentage: "number",
           options: "array of cost options"
         },
@@ -295,7 +323,21 @@ ${JSON.stringify(costData, null, 2)}
 Provide detailed budget analysis and allocation recommendations.`;
 
     try {
-      return await groqClient.parseStructuredResponse(prompt, systemPrompt, schema);
+      const completion = await groqClient.chat.completions.create({
+        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }],
+        model: 'llama3-70b-8192',
+        temperature: 0.1,
+        response_format: { type: "json_object" },
+        max_tokens: 4000
+      });
+
+      const response = completion.choices[0]?.message?.content || '{}';
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      throw new Error('No valid JSON in response');
     } catch (error) {
       console.error('Budget analysis failed:', error.message);
       return this.createFallbackBudgetAnalysis(context);
@@ -387,7 +429,21 @@ Seasonal Tips: ${JSON.stringify(consolidatedContent.practicalInfo.seasonalTips, 
 Provide comprehensive logistics guidance for itinerary implementation.`;
 
     try {
-      return await groqClient.parseStructuredResponse(prompt, systemPrompt, schema);
+      const completion = await groqClient.chat.completions.create({
+        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }],
+        model: 'llama3-70b-8192',
+        temperature: 0.1,
+        response_format: { type: "json_object" },
+        max_tokens: 4000
+      });
+
+      const response = completion.choices[0]?.message?.content || '{}';
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      throw new Error('No valid JSON in response');
     } catch (error) {
       console.error('Logistics summarization failed:', error.message);
       return this.createFallbackLogistics(context);
@@ -453,8 +509,9 @@ Provide comprehensive logistics guidance for itinerary implementation.`;
       ],
       budgetOptimizationTips: [
         'Book accommodations early for group discounts',
-        'Consider package deals for activities',
-        'Plan meals to include local cuisine'
+        'Consider off-season timing',
+        'Look for group discounts',
+        'Bundle activities for savings'
       ],
       riskMitigation: [
         'Have backup indoor activities for weather',
@@ -523,10 +580,15 @@ Provide comprehensive logistics guidance for itinerary implementation.`;
         }
       ],
       costOptimizationTips: [
-        'Book early for better rates',
+        'Book accommodations early for group discounts',
         'Consider off-season timing',
         'Look for group discounts',
         'Bundle activities for savings'
+      ],
+      riskMitigation: [
+        'Have backup indoor activities for weather',
+        'Confirm all bookings 48 hours before',
+        'Keep emergency contact list'
       ]
     };
   }

@@ -42,34 +42,19 @@ Response:`;
     const response = await this.generateResponse(structuredPrompt, systemPrompt);
     
     try {
-      return JSON.parse(response);
-    } catch (error) {
-      console.warn('Failed to parse JSON response, attempting cleanup...');
-      // Try to extract JSON from the response
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
       }
       throw new Error('Could not parse structured response');
-    }
-  }
-
-  async generateWithRetry(prompt, systemPrompt = '', maxRetries = 3) {
-    let lastError;
-    
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        return await this.generateResponse(prompt, systemPrompt);
-      } catch (error) {
-        lastError = error;
-        console.warn(`Attempt ${i + 1} failed:`, error.message);
-        if (i < maxRetries - 1) {
-          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-        }
+    } catch (error) {
+      console.warn('Failed to parse JSON response, attempting cleanup...');
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
       }
+      throw new Error('Could not parse structured response even after cleanup');
     }
-    
-    throw lastError;
   }
 }
 
